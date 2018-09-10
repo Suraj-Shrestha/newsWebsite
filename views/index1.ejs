@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="container">
+      <% if(news !== null){ %>
+        <p><% news.forEach( function(item){ %>
+          <div id="newsItem">
+            <li> <%= item.title %> 
+              published at <%= item.date_published %>
+              pub_name at <%= item._polaris_extra.pub_name %>
+            </li>
+            
+          </div>
+        <% }); %></p>
+      <% } %>
+    
+      <% if(error !== null){ %>
+        <p><%= error %></p>
+      <% } %>
+    </div>
+  </body>
+</html>
