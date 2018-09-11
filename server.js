@@ -12,8 +12,6 @@ app.use(bodyParser.urlencoded({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-var newsArray = [];
-
 function getNewsArrayFromUrl(thisUrl) {
   return new Promise((resolve, reject) => {
     request(thisUrl, function (err, res, body) {
@@ -38,7 +36,6 @@ const p3 = getNewsArrayFromUrl(rbnettUrl);
 
 
 app.get("/", function (req, res) {
-
   Promise.all([p1, p2, p3]).then((data) => {
     res.render("index", {
       news: data[0].items.concat(data[1].items, data[2].items),
@@ -61,7 +58,6 @@ app.post('/', function (req, res) {
   let news = req.body.news;
   //console.log("news " + news);
   Promise.all([p1, p2, p3]).then((data) => {
-    newsArray = data[0].items.concat(data[1].items, data[2].items)
     res.render("index", {
       news: data[0].items.concat(data[1].items, data[2].items),
       filter_value: (news.toLowerCase() === 'all') ? "" : news.toLowerCase(),
@@ -78,14 +74,6 @@ app.post('/', function (req, res) {
     });
   });
 
-})
-
-app.get("/newsItem/:id", function (req, res) {
-  var newsID = req.params.id;
-  console.log(newsID);
-  console.log(newsArray);
-  // console.log("res" + res);
-  res.send({body: testing});
 })
 
 app.listen(3000, function () {
