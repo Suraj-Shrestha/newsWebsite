@@ -2,12 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
 const app = express()
+var moment = require('moment');
+var path = require('path');
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-app.set('view engine', 'ejs')
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+var newsArray = [];
 
 function getNewsArrayFromUrl(thisUrl) {
   return new Promise((resolve, reject) => {
@@ -23,40 +28,64 @@ function getNewsArrayFromUrl(thisUrl) {
   });
 }
 
-app.get("/", function (req, res) {
-  const adressaUrl = 'https://www.adressa.no/kultur/?service=jsonfeed';
-  const smpUrl = 'https://www.smp.no/kultur/?service=jsonfeed';
-  const rbnettUrl = 'https://www.rbnett.no/kultur/?service=jsonfeed';
+const adressaUrl = 'https://www.adressa.no/kultur/?service=jsonfeed';
+const smpUrl = 'https://www.smp.no/kultur/?service=jsonfeed';
+const rbnettUrl = 'https://www.rbnett.no/kultur/?service=jsonfeed';
 
-  const p1 = getNewsArrayFromUrl(adressaUrl);
-  const p2 = getNewsArrayFromUrl(smpUrl);
-  const p3 = getNewsArrayFromUrl(rbnettUrl);
+const p1 = getNewsArrayFromUrl(adressaUrl);
+const p2 = getNewsArrayFromUrl(smpUrl);
+const p3 = getNewsArrayFromUrl(rbnettUrl);
+
+
+app.get("/", function (req, res) {
 
   Promise.all([p1, p2, p3]).then((data) => {
     res.render("index", {
-      news_adressa: data[0].items,
-      news_smp: data[1].items,
-      news_rbnett: data[2].items,
+      news: data[0].items.concat(data[1].items, data[2].items),
+      filter_value: "",
+      moment: moment,
       error: null
     });
   }).catch(err => {
     console.error('There was a problem', err);
     res.render('index', {
-      news_adressa: null,
-      news_smp: null,
-      news_rbnett: null,
+      news: null,
+      filter_value: "",
+      moment: moment,
       error: "Error occurred !" + err
     });
   });
 
 });
-
-app.post('/newsItem', function (req, res) {
+app.post('/', function (req, res) {
+  let news = req.body.news;
+  //console.log("news " + news);
+  Promise.all([p1, p2, p3]).then((data) => {
+    newsArray = data[0].items.concat(data[1].items, data[2].items)
+    res.render("index", {
+      news: data[0].items.concat(data[1].items, data[2].items),
+      filter_value: (news.toLowerCase() === 'all') ? "" : news.toLowerCase(),
+      moment: moment,
+      error: null
+    });
+  }).catch(err => {
+    console.error('There was a problem', err);
+    res.render('index', {
+      news: null,
+      filter_value: "",
+      moment: moment,
+      error: "Error occurred !" + err
+    });
+  });
 
 })
 
-app.get('/btnSelectNewsSource', function(req,res) {
-  
+app.get("/newsItem/:id", function (req, res) {
+  var newsID = req.params.id;
+  console.log(newsID);
+  console.log(newsArray);
+  // console.log("res" + res);
+  res.send({body: testing});
 })
 
 app.listen(3000, function () {
